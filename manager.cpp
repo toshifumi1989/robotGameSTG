@@ -115,6 +115,7 @@ void GameManager::sceneResult(float delta) {
 
 		_scene.change(&GameManager::sceneTitle);
 
+		deleteMusic();
 		delete result;
 		delete camera;
 		delete player;		

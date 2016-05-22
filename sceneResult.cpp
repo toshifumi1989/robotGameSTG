@@ -34,6 +34,10 @@ void Result::sceneUpdate() {
 	glColor3f(1, 1, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if (timeMusic() >= 2) {
+		stopMusic();
+	}
+
 	camera->yow -= 0.01f;
 	camera->update();
 

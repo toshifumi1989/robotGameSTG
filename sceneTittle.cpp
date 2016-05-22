@@ -74,8 +74,8 @@ void SceneTitle::update() {
 				glPushMatrix();
 				{
 					glDisable(GL_TEXTURE_2D);
-					char start[] = " Please Push Start";
-					glTranslatef(1200, 1300, 0);
+					char start[] = " Please Push Start or Spece";
+					glTranslatef(500, 1300, 0);
 					glScalef(2, 2, 0);
 					glLineWidth(4);
 					for (int i = 0; start[i] != 0; i++) {
@@ -90,8 +90,10 @@ void SceneTitle::update() {
 			}
 		}
 
+		static unsigned char tmpSpeceKey = 0;
 
-		if ((downKeys & XINPUT_GAMEPAD_START)) {
+		if ((downKeys & XINPUT_GAMEPAD_START)
+			||(tmpSpeceKey == 0 && keys[' '] == 1)) {
 			if (moveSelect == false) {
 				wordCount = 0;
 				moveSelect = true;
@@ -173,7 +175,7 @@ void SceneTitle::update() {
 			glEnd();
 		}
 
-
+		tmpSpeceKey = keys[' '];
 	}
 	else {
 		//‘I‘ð‰æ–Ê------------------------------------------------------------------
@@ -197,7 +199,11 @@ void SceneTitle::update() {
 		}
 		glEnd();
 
-		if (joystic.upKeysFlag == true) {
+		static unsigned char tmpKey_w = 0;
+		static unsigned char tmpKey_s = 0;
+
+		if ((joystic.upKeysFlag == true)
+			||(tmpKey_w == 0 && keys['w'] == 1)) {
 			if (change == modeNormal) {
 				change = modeSurvival;
 			}
@@ -205,7 +211,8 @@ void SceneTitle::update() {
 				change = modeNormal;
 			}
 		}
-		else if (joystic.downKeysFlag == true) {
+		else if ((joystic.downKeysFlag == true)
+			|| (tmpKey_s == 0 && keys['s'] == 1)) {
 			if (change == modeNormal) {
 				change = modeSurvival;
 			}
@@ -217,8 +224,24 @@ void SceneTitle::update() {
 		glPushMatrix();
 		{
 			glDisable(GL_TEXTURE_2D);
-			char start[] = "[A] : select";
-			glTranslatef(1750, 1000, 0);
+			char start[] = "[A] or Spece : select";
+			glTranslatef(1350, 1000, 0);
+			glScalef(1.5f, 1.5f, 0);
+			glLineWidth(2);
+			for (int i = 0; start[i] != 0; i++) {
+				glutStrokeCharacter(
+					GLUT_STROKE_ROMAN,			//void *font,int
+					start[i]);						//character
+			}
+			glEnable(GL_TEXTURE_2D);
+		}
+		glPopMatrix();
+
+		glPushMatrix();
+		{
+			glDisable(GL_TEXTURE_2D);
+			char start[] = " W or S : changeMode";
+			glTranslatef(1150, 600, 0);
 			glScalef(1.5f, 1.5f, 0);
 			glLineWidth(2);
 			for (int i = 0; start[i] != 0; i++) {
@@ -319,9 +342,16 @@ void SceneTitle::update() {
 			wordCount = 0;
 			sceneMove = true;
 		}
+
+		
+		tmpKey_w = keys['w'];
+		tmpKey_s = keys['s'];
 	}
 
 	joystic.lastkeys = joystic.state.Gamepad.wButtons;
+
+	
+
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
 }

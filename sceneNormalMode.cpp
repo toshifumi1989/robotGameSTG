@@ -44,12 +44,19 @@ void NormalMode::init() {
 	glEnable(GL_CULL_FACE);		//カリング
 	glEnable(GL_DEPTH_TEST);	//深度テスト
 
+	readSound("Explosion.wav");
+
+
 }
 
 ////////////////////////////////////////////////
 //更新
 ////////////////////////////////////////////////
 void NormalMode::update() {
+
+	if (timeMusic() >= 2) {
+		stopMusic();
+	}
 
 	//プレイヤー--------------------------------------------
 	player->controller();
@@ -121,6 +128,8 @@ void NormalMode::update() {
 	for (auto enemyIter = enemy.begin();
 	enemyIter != enemy.end();) {
 		if (enemyIter->HP <= 0) {
+
+			playMusic();
 
 			if (player->targetFlag == true) {
 

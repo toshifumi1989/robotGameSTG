@@ -38,6 +38,12 @@ void Player::controller() {
 			camera->yow -= joystic.state.Gamepad.sThumbRX / rightStickYawQuantity;
 
 		}
+		else if (keys['l'] == 1) {
+			camera->yow -= 1;
+		}
+		else if (keys['j'] == 1) {
+			camera->yow += 1;
+		}
 
 		//スティックの入力がある場合（ｙ軸
 		if (DEADZONEPLUS < joystic.state.Gamepad.sThumbRY ||
@@ -55,10 +61,30 @@ void Player::controller() {
 			}
 
 		}
+		else if (keys['i'] == 1 || keys['k'] == 1) {
+			if (keys['i'] == 1) {
+				updown += 1;
+			}
+			else {
+				updown -= 1;
+			}
+
+			char cameraLimit = 80;
+			if (updown > cameraLimit) {
+				updown = cameraLimit;
+			}
+			else if (updown < -cameraLimit) {
+				updown = -cameraLimit;
+			}
+		}
+
 	}
 
+	static unsigned char tmpSpaceKeys = 0;
+
 	//ターゲットのON OFF
-	if (downKeys & XINPUT_GAMEPAD_B) {
+	if ((downKeys & XINPUT_GAMEPAD_B )
+		|| (tmpSpaceKeys == 0 && keys[' '] == 1)) {
 		targetNum = -1;
 		if (targetFlag == true) {
 
@@ -108,8 +134,11 @@ void Player::controller() {
 		}
 	}
 
+	static unsigned char tmpKey_q = 0;
+
 	//ターゲット切り替え
-	if (downKeys & XINPUT_GAMEPAD_LEFT_SHOULDER) {//ボタンを押したとき
+	if ((downKeys & XINPUT_GAMEPAD_LEFT_SHOULDER)
+		|| ( tmpKey_q == 0 && keys['q'] == 1 )) {//ボタンを押したとき
 		if (targetFlag == true) {
 			if (enemy.size() > 1) {
 				turn(false);
@@ -117,8 +146,11 @@ void Player::controller() {
 		}
 	}
 
+	static unsigned char tmpKey_o = 0;
+
 	//ターゲット切り替え
-	if (downKeys & XINPUT_GAMEPAD_RIGHT_SHOULDER) {//ボタンを押したとき
+	if ((downKeys & XINPUT_GAMEPAD_RIGHT_SHOULDER)
+		|| (tmpKey_o == 0 && keys['o'] == 1)) {//ボタンを押したとき
 		if (targetFlag == true) {
 			if (enemy.size() > 1) {
 				turn(true);
@@ -166,7 +198,10 @@ void Player::controller() {
 
 
 	//ライフル--------------------------------------------------------------
-	if (joystic.rightTrigerFlag == true) {
+	static unsigned char tmpKey_e = 0;
+
+	if ((joystic.rightTrigerFlag == true)
+		||(tmpKey_e == 0 && keys['e'] == 1)) {
 		//オーバーヒートではなければ撃てる
 		if (overHeat == false) {
 
@@ -200,7 +235,10 @@ void Player::controller() {
 	}
 
 	//ショットガン------------------------------------------------------------
-	if (joystic.leftTrigerFlag == true) {
+	static unsigned char tmpKey_u = 0;
+	
+	if ((joystic.leftTrigerFlag == true)
+		||(tmpKey_u == 0 && keys['u'] == 1)) {
 
 		if (overHeat == false) {
 
@@ -238,7 +276,9 @@ void Player::controller() {
 
 
 	//ジャンプ-----------------------------------------------------------------
-	if (downKeys & XINPUT_GAMEPAD_A) {
+	static unsigned char tmpKey_m = 0;
+	if ((downKeys & XINPUT_GAMEPAD_A) 
+		||(tmpKey_m == 0 && keys['m'] == 1)) {
 		if (junpFlag == false) {
 			junpFlag = true;
 			speed.y = 1.4f;
@@ -253,17 +293,39 @@ void Player::controller() {
 	glm::vec3 playerDirec = glm::vec3(-sin(playerRad), 0, -cos(playerRad));
 	glm::vec3 targetDirec;
 
-	glm::vec2 stickDirec(joystic.state.Gamepad.sThumbLX, joystic.state.Gamepad.sThumbLY);
+	float moveX = 0;
+	if (keys['a'] == 1) {
+		moveX = -32768.f;
+	}
+	else if (keys['d'] == 1) {
+		moveX = 32768.f;
+	}
+	else {
+		moveX = joystic.state.Gamepad.sThumbLX;
+	}
+
+	float moveY = 0;
+	if (keys['w'] == 1) {
+		moveY = 32768.f;
+	}
+	else if (keys['s'] == 1) {
+		moveY = -32768.f;
+	}
+	else {
+		moveY = joystic.state.Gamepad.sThumbLY;
+	}
+
+	glm::vec2 stickDirec(moveX, moveY);
 
 	if (glm::dot(stickDirec, stickDirec) > INPUT_DEADZONE * INPUT_DEADZONE) {
 
-		inputYow = -atan2(joystic.state.Gamepad.sThumbLX / 32768.f, joystic.state.Gamepad.sThumbLY / 32768.f) * 180 / M_PI + camera->yow;
+		inputYow = -atan2(moveX / 32768.f, moveY / 32768.f) * 180 / M_PI + camera->yow;
 		float targetRad = inputYow * (M_PI / 180.0f);
 		targetDirec = glm::vec3(-sin(targetRad), 0, -cos(targetRad));
 
 		//プレイヤー移動
-		speed.x += cos(camera->yow * M_PI / 180) * joystic.state.Gamepad.sThumbLX / 1000000 - sin(camera->yow * M_PI / 180) * joystic.state.Gamepad.sThumbLY / 2000000;
-		speed.z += -cos(camera->yow * M_PI / 180) * joystic.state.Gamepad.sThumbLY / 1000000 - sin(camera->yow * M_PI / 180) * joystic.state.Gamepad.sThumbLX / 2000000;
+		speed.x += cos(camera->yow * M_PI / 180) * moveX / 1000000 - sin(camera->yow * M_PI / 180) * moveY / 2000000;
+		speed.z += -cos(camera->yow * M_PI / 180) * moveY / 1000000 - sin(camera->yow * M_PI / 180) * moveX / 2000000;
 
 		//土煙描画の設定
 		if (junpFlag == false) {
@@ -297,6 +359,12 @@ void Player::controller() {
 	camera->lastUpDown = camera->upDown;
 	joystic.lastkeys = joystic.state.Gamepad.wButtons;					//このシーンで押していたボタンを保存するため
 
+	tmpSpaceKeys = keys[' '];
+	tmpKey_o = keys['o'];
+	tmpKey_e = keys['e'];
+	tmpKey_q = keys['q']; 
+	tmpKey_u = keys['u'];
+	tmpKey_m = keys['m'];
 }
 
 /////////////////////////////////////////////////////////////

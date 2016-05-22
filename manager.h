@@ -2,6 +2,7 @@
 #define MANAGER_H
 
 #include"scene.h"
+#include"library\sound.h"
 
 enum MODE{
 	selectNormal,

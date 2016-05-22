@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include"glut.h"
 #include"library\Xinput.h"
-
+#include"library\sound.h"
 #include"manager.h"
 #include"library\camera.h"
 
@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
 	glutKeyboardFunc(keyboard);
 	glutKeyboardUpFunc(keyboardUp);
 	glutIgnoreKeyRepeat(GL_TRUE);
+
+	initMusic();
 
 	init();
 	glutMainLoop();
